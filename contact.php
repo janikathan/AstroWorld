@@ -1,45 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form</title>
-    <link rel="stylesheet" href="css/style1.css">
-</head>
+  // Replace contact@example.com with your real receiving email address
+  $receiving_email_address = 'contact@example.com';
 
-<body>
-    <div class="container">
-        <div class="form-box box">
-            <?php
-            include "connection.php"; 
-            if (isset($_POST['submit'])) 
-                $name = $_POST['name'];
-                $email = $_POST['email'];
-                $subject = $_POST['subject'];
-                $message = $_POST['message'];
-                $query = "INSERT INTO contact(name,email,subject,message) VALUES('$name','$email','$subject','$message')";
-                $data = mysqli_query($conn, $query);
-                if ($data) {
-                    echo "<div class='message'>
-                    <p>Message sent successfully </p>
-                    </div><br>";
-                
-                    echo "<a href='../astrolog/home.php'><button class='btn'>Go Back</button></a>";
-                } else {
-                    echo "<div class='message'>
-                    <p>Message sending fail 😔</p>
-                    </div><br>";
-                    
-                    echo "Error: " . mysqli_error($conn); 
-                    echo "<a href='index.php'><button class='btn'>Go Back</button></a>";
-                }
-                
+  if( file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php' )) {
+    include( $php_email_form );
+  } else {
+    die( 'Unable to load the "PHP Email Form" Library!');
+  }
 
-            ?>
+  $contact = new PHP_Email_Form;
+  $contact->ajax = true;
+  
+  $contact->to = $receiving_email_address;
+  $contact->from_name = $_POST['name'];
+  $contact->from_email = $_POST['email'];
+  $contact->subject = $_POST['subject'];
 
-        </div>
-    </div>
-</body>
+  // Uncomment below code if you want to use SMTP to send emails. You need to enter your correct SMTP credentials
+  /*
+  $contact->smtp = array(
+    'host' => 'example.com',
+    'username' => 'example',
+    'password' => 'pass',
+    'port' => '587'
+  );
+  */
 
-</html>
+  $contact->add_message( $_POST['name'], 'From');
+  $contact->add_message( $_POST['email'], 'Email');
+  $contact->add_message( $_POST['message'], 'Message', 10);
+
+  echo $contact->send();
+?>
